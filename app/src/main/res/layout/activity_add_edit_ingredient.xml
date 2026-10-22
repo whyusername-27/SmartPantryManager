@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/background_light"
     android:padding="24dp">
 
     <TextView
@@ -12,45 +13,64 @@
         android:text="Add / Edit Ingredient"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:textColor="@color/dark_navy"
         android:layout_marginBottom="24dp" />
 
+    <!-- 1. Ingredient Name Input -->
     <EditText
         android:id="@+id/etIngredientName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Ingredient Name (e.g., Rice, Milk, Egg)"
+        android:textColor="@color/dark_navy"
+        android:textColorHint="#757575"
+        android:backgroundTint="@color/primary_orange"
         android:inputType="text"
         android:layout_marginBottom="16dp" />
 
+    <!-- 2. Quantity Input -->
     <EditText
         android:id="@+id/etQuantity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Quantity (e.g., 2.5)"
+        android:textColor="@color/dark_navy"
+        android:textColorHint="#757575"
+        android:backgroundTint="@color/primary_orange"
         android:inputType="numberDecimal"
         android:layout_marginBottom="16dp" />
 
+    <!-- 3. Unit Input -->
     <EditText
         android:id="@+id/etUnit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Unit (e.g., kg, liters, pcs)"
+        android:textColor="@color/dark_navy"
+        android:textColorHint="#757575"
+        android:backgroundTint="@color/primary_orange"
         android:inputType="text"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="24dp" />
 
     <EditText
         android:id="@+id/etExpiryDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Expiry Date (YYYY-MM-DD)"
+        android:hint="Expiry Date (e.g., 2026-12-31)"
+        android:textColor="@color/dark_navy"
+        android:textColorHint="#757575"
+        android:backgroundTint="@color/primary_orange"
         android:inputType="date"
         android:layout_marginBottom="24dp" />
 
+    <!-- Save Button -->
     <Button
         android:id="@+id/btnSaveIngredient"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save Ingredient"
+        android:backgroundTint="@color/primary_orange"
+        android:textColor="@color/white"
         android:padding="12dp" />
+
 </LinearLayout>

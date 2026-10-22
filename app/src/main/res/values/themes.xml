@@ -16,5 +16,9 @@
 
         <!-- Text Colors -->
         <item name="android:textColorPrimary">@color/dark_navy</item>
+
+        <!-- Text and Hint Defaults -->
+        <item name="android:editTextColor">@color/dark_navy</item>
+        <item name="android:textColorHint">#757575</item>
     </style>
 </resources>

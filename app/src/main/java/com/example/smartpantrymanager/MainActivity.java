@@ -14,13 +14,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+// Main dashboard activity managing pantry inventory display, adding items, and app navigation
 public class MainActivity extends AppCompatActivity {
 
+    // UI View references
     private EditText etName, etQty, etUnit;
     private Button btnAdd, btnViewSuggestions;
     private RecyclerView rvPantry;
     private TextView tvEmpty;
 
+    // Database and data adapter variables
     private DatabaseHelper dbHelper;
     private PantryAdapter adapter;
     private List<PantryItem> pantryList;
@@ -30,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Bind UI Elements
+        // Bind layout UI elements
         etName = findViewById(R.id.etIngredientName);
         etQty = findViewById(R.id.etQuantity);
         etUnit = findViewById(R.id.etUnit);
@@ -39,18 +42,19 @@ public class MainActivity extends AppCompatActivity {
         rvPantry = findViewById(R.id.rvPantry);
         tvEmpty = findViewById(R.id.tvEmptyPantry);
 
+        // Initialize database helper and pantry list
         dbHelper = new DatabaseHelper(this);
         pantryList = new ArrayList<>();
 
-        // Configure RecyclerView
+        // Set up RecyclerView with linear layout manager and delete click listener
         rvPantry.setLayoutManager(new LinearLayoutManager(this));
         adapter = new PantryAdapter(pantryList, item -> deletePantryItem(item));
         rvPantry.setAdapter(adapter);
 
-        // Load existing pantry records from database
+        // Load existing pantry items from database on startup
         loadPantryItems();
 
-        // Handle Add/Update Ingredient
+        // Button click listeners
         btnAdd.setOnClickListener(v -> addIngredient());
 
         btnViewSuggestions.setOnClickListener(v -> {
@@ -59,32 +63,32 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // 1. Inflate the menu items into the Activity's Action Bar / Toolbar
+    // Inflates options menu layout into the app toolbar
     @Override
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
-    // 2. Handle click events when a user selects an item from the menu
+    // Handles top action bar navigation menu item selections
     @Override
     public boolean onOptionsItemSelected(android.view.MenuItem item) {
         int id = item.getItemId();
 
         if (id == R.id.menu_add) {
-            // Navigates to Screen 2: Add/Edit Ingredient
+            // Navigate to Add/Edit Ingredient screen
             Intent intent = new Intent(MainActivity.this, AddEditIngredientActivity.class);
             startActivity(intent);
             return true;
 
         } else if (id == R.id.menu_recipes) {
-            // Navigates to Screen 3: Recipe Suggestions
+            // Navigate to Recipe Suggestions screen
             Intent intent = new Intent(MainActivity.this, RecipeSuggestionActivity.class);
             startActivity(intent);
             return true;
 
         } else if (id == R.id.menu_settings) {
-            // Navigates to Screen 5: Settings
+            // Navigate to Settings screen
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
             return true;
@@ -93,10 +97,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Retrieves all pantry records from SQLite database and updates list UI
     private void loadPantryItems() {
         pantryList.clear();
         Cursor cursor = dbHelper.getAllPantryItems();
 
+        // Iterate through cursor rows to populate data list
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_PANTRY_ID));
@@ -112,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
         adapter.notifyDataSetChanged();
 
-        // Show/Hide Empty State Feedback
+        // Toggle empty list feedback message
         if (pantryList.isEmpty()) {
             tvEmpty.setVisibility(View.VISIBLE);
             rvPantry.setVisibility(View.GONE);
@@ -122,17 +128,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Validates form input fields and saves new ingredient to SQLite
     private void addIngredient() {
         String name = etName.getText().toString().trim();
         String qtyStr = etQty.getText().toString().trim();
         String unit = etUnit.getText().toString().trim();
 
-        // Input Validation
+        // Ensure fields are not blank
         if (name.isEmpty() || qtyStr.isEmpty() || unit.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields (Name, Quantity, Unit)", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Validate numeric format for quantity input
         double qty;
         try {
             qty = Double.parseDouble(qtyStr);
@@ -141,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Insert into SQLite Database
+        // Insert or update record in database
         boolean success = dbHelper.addOrUpdatePantryItem(name, qty, unit, "");
         if (success) {
             Toast.makeText(this, "Ingredient saved!", Toast.LENGTH_SHORT).show();
@@ -154,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Deletes specified pantry item from database and refreshes view
     private void deletePantryItem(PantryItem item) {
         boolean deleted = dbHelper.deletePantryItem(item.getId());
         if (deleted) {
@@ -163,5 +172,4 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Failed to delete item", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

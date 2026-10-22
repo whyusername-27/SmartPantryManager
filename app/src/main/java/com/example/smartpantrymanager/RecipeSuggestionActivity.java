@@ -12,8 +12,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+// Activity that compares pantry stock against saved recipes to show matching suggestions
 public class RecipeSuggestionActivity extends AppCompatActivity {
 
+    // UI elements and data structures
     private RecyclerView rvRecipes;
     private TextView tvNoSuggestions;
     private DatabaseHelper dbHelper;
@@ -23,21 +25,27 @@ public class RecipeSuggestionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Link screen layout XML
         setContentView(R.layout.activity_recipe_suggestions);
 
+        // Bind layout views
         rvRecipes = findViewById(R.id.rvRecipes);
         tvNoSuggestions = findViewById(R.id.tvNoSuggestions);
 
+        // Initialize helper objects and list container
         dbHelper = new DatabaseHelper(this);
         suggestedRecipes = new ArrayList<>();
 
+        // Configure RecyclerView layout manager and adapter
         rvRecipes.setLayoutManager(new LinearLayoutManager(this));
         adapter = new RecipeAdapter(suggestedRecipes);
         rvRecipes.setAdapter(adapter);
 
+        // Search for matching recipes based on current pantry items
         findMatchingRecipes();
     }
 
+    // Queries pantry items and matches them against all available recipes
     private void findMatchingRecipes() {
         suggestedRecipes.clear();
 
@@ -71,6 +79,7 @@ public class RecipeSuggestionActivity extends AppCompatActivity {
 
         adapter.notifyDataSetChanged();
 
+        // Toggle visibility between suggestions list and empty state message
         if (suggestedRecipes.isEmpty()) {
             tvNoSuggestions.setVisibility(View.VISIBLE);
             rvRecipes.setVisibility(View.GONE);
@@ -80,6 +89,7 @@ public class RecipeSuggestionActivity extends AppCompatActivity {
         }
     }
 
+    // Helper method to check if every ingredient in a raw string is available in the pantry
     private boolean hasAllIngredients(Set<String> pantrySet, String ingredientsRaw) {
         if (ingredientsRaw == null || ingredientsRaw.trim().isEmpty()) {
             return false;

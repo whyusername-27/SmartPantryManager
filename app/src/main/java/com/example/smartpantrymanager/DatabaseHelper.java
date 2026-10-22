@@ -6,35 +6,39 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+// Manages database creation, schema updates, and CRUD operations for the application
 public class DatabaseHelper extends SQLiteOpenHelper {
 
+    // Database configurations
     private static final String DATABASE_NAME = "SmartPantry.db";
     private static final int DATABASE_VERSION = 1;
 
-    // Table Names
+    // Table names
     public static final String TABLE_PANTRY = "pantry";
     public static final String TABLE_RECIPES = "recipes";
 
-    // Pantry Columns
+    // Column names for the Pantry table
     public static final String COL_PANTRY_ID = "id";
     public static final String COL_PANTRY_NAME = "ingredient_name";
     public static final String COL_PANTRY_QTY = "quantity";
     public static final String COL_PANTRY_UNIT = "unit";
     public static final String COL_PANTRY_EXPIRY = "expiry_date";
 
-    // Recipe Columns
+    // Column names for the Recipes table
     public static final String COL_RECIPE_ID = "id";
     public static final String COL_RECIPE_NAME = "recipe_name";
     public static final String COL_RECIPE_INGREDIENTS = "ingredients_list";
     public static final String COL_RECIPE_STEPS = "instructions";
 
+    // Constructor to set up the SQLite database helper
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    // Runs when the database is created for the first time
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Creating Pantry Table
+        // Create the Pantry table schema
         String createPantryTable = "CREATE TABLE " + TABLE_PANTRY + " (" +
                 COL_PANTRY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_PANTRY_NAME + " TEXT UNIQUE, " +
@@ -43,7 +47,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_PANTRY_EXPIRY + " TEXT)";
         db.execSQL(createPantryTable);
 
-        // Creating Recipes Table
+        // Create the Recipes table schema
         String createRecipeTable = "CREATE TABLE " + TABLE_RECIPES + " (" +
                 COL_RECIPE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_RECIPE_NAME + " TEXT, " +
@@ -51,10 +55,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_RECIPE_STEPS + " TEXT)";
         db.execSQL(createRecipeTable);
 
-        // Initial 15 Recipes
+        // Pre-populate the database with initial recipe data
         seedRecipes(db);
     }
 
+    // Handles database version upgrades by resetting tables
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PANTRY);
@@ -62,6 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    // Helper method to seed initial default recipes into the database
     private void seedRecipes(SQLiteDatabase db) {
         insertRecipe(db, "Scrambled Eggs", "egg:2:pcs,butter:1:tbsp,salt:1:pinch",
                 "1. Beat eggs with salt.\n2. Melt butter in pan over low heat.\n3. Cook eggs gently, stirring constantly until soft curds form.");
@@ -109,6 +115,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "1. Boil pasta in salted water until al dente.\n2. Sauté sliced garlic gently in olive oil.\n3. Toss drained pasta into garlic oil.");
     }
 
+    // Helper method to insert a single recipe record into the database
     private void insertRecipe(SQLiteDatabase db, String name, String ingredients, String steps) {
         ContentValues cv = new ContentValues();
         cv.put(COL_RECIPE_NAME, name);
@@ -116,7 +123,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COL_RECIPE_STEPS, steps);
         db.insert(TABLE_RECIPES, null, cv);
     }
-    // CREATE: Adding or Updating Pantry Item
+
+    // Inserts a new pantry item or updates an existing one if the name conflicts
     public boolean addOrUpdatePantryItem(String name, double qty, String unit, String expiry) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -125,24 +133,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COL_PANTRY_UNIT, unit.trim().toLowerCase());
         cv.put(COL_PANTRY_EXPIRY, expiry);
 
-        // Replace on conflict if item exists
+        // Overwrite existing record on name conflict
         long result = db.insertWithOnConflict(TABLE_PANTRY, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         return result != -1;
     }
 
-    // READ: Getting All Pantry Items
+    // Queries and returns all pantry items sorted alphabetically
     public Cursor getAllPantryItems() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_PANTRY + " ORDER BY " + COL_PANTRY_NAME + " ASC", null);
     }
 
-    // DELETE: Deleting Pantry Item by ID
+    // Deletes a specific pantry item by its unique ID
     public boolean deletePantryItem(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(TABLE_PANTRY, COL_PANTRY_ID + "=?", new String[]{String.valueOf(id)}) > 0;
     }
 
-    // READ: Get All Pre-loaded Recipes
+    // Queries and returns all saved recipe records
     public Cursor getAllRecipes() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_RECIPES, null);
