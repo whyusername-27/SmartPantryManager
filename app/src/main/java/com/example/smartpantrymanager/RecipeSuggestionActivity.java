@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RecipeSuggestionsActivity extends AppCompatActivity {
+public class RecipeSuggestionActivity extends AppCompatActivity {
 
     private RecyclerView rvRecipes;
     private TextView tvNoSuggestions;

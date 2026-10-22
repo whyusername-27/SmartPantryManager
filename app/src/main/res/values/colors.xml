@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary Brand / Accent Color -->
+    <color name="primary_orange">#FF724C</color>
+
+    <!-- Secondary / Accent Highlight Color -->
+    <color name="secondary_yellow">#FDBF50</color>
+
+    <!-- Light Background Surface Color -->
+    <color name="background_light">#F4F4F8</color>
+
+    <!-- Dark Text / Header / Dark Surface Color -->
+    <color name="dark_navy">#2A2C41</color>
+
+    <!-- Standard System Utility Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="gray">#888888</color>
 </resources>

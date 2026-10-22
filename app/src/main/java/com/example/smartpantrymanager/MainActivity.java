@@ -54,9 +54,43 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(v -> addIngredient());
 
         btnViewSuggestions.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, RecipeSuggestionsActivity.class);
+            Intent intent = new Intent(MainActivity.this, RecipeSuggestionActivity.class);
             startActivity(intent);
         });
+    }
+
+    // 1. Inflate the menu items into the Activity's Action Bar / Toolbar
+    @Override
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    // 2. Handle click events when a user selects an item from the menu
+    @Override
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_add) {
+            // Navigates to Screen 2: Add/Edit Ingredient
+            Intent intent = new Intent(MainActivity.this, AddEditIngredientActivity.class);
+            startActivity(intent);
+            return true;
+
+        } else if (id == R.id.menu_recipes) {
+            // Navigates to Screen 3: Recipe Suggestions
+            Intent intent = new Intent(MainActivity.this, RecipeSuggestionActivity.class);
+            startActivity(intent);
+            return true;
+
+        } else if (id == R.id.menu_settings) {
+            // Navigates to Screen 5: Settings
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void loadPantryItems() {
