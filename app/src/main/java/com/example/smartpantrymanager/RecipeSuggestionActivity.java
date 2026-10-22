@@ -1,0 +1,102 @@
+package com.example.smartpantrymanager;
+
+import android.database.Cursor;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class RecipeSuggestionsActivity extends AppCompatActivity {
+
+    private RecyclerView rvRecipes;
+    private TextView tvNoSuggestions;
+    private DatabaseHelper dbHelper;
+    private RecipeAdapter adapter;
+    private List<Recipe> suggestedRecipes;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_recipe_suggestions);
+
+        rvRecipes = findViewById(R.id.rvRecipes);
+        tvNoSuggestions = findViewById(R.id.tvNoSuggestions);
+
+        dbHelper = new DatabaseHelper(this);
+        suggestedRecipes = new ArrayList<>();
+
+        rvRecipes.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new RecipeAdapter(suggestedRecipes);
+        rvRecipes.setAdapter(adapter);
+
+        findMatchingRecipes();
+    }
+
+    private void findMatchingRecipes() {
+        suggestedRecipes.clear();
+
+        // 1. Fetch current pantry ingredient names (normalized to lowercase)
+        Set<String> pantryIngredients = new HashSet<>();
+        Cursor pantryCursor = dbHelper.getAllPantryItems();
+        if (pantryCursor != null && pantryCursor.moveToFirst()) {
+            do {
+                String name = pantryCursor.getString(pantryCursor.getColumnIndexOrThrow(DatabaseHelper.COL_PANTRY_NAME));
+                pantryIngredients.add(name.trim().toLowerCase());
+            } while (pantryCursor.moveToNext());
+            pantryCursor.close();
+        }
+
+        // 2. Fetch all database recipes and evaluate strict matching logic
+        Cursor recipeCursor = dbHelper.getAllRecipes();
+        if (recipeCursor != null && recipeCursor.moveToFirst()) {
+            do {
+                int id = recipeCursor.getInt(recipeCursor.getColumnIndexOrThrow(DatabaseHelper.COL_RECIPE_ID));
+                String name = recipeCursor.getString(recipeCursor.getColumnIndexOrThrow(DatabaseHelper.COL_RECIPE_NAME));
+                String ingredientsRaw = recipeCursor.getString(recipeCursor.getColumnIndexOrThrow(DatabaseHelper.COL_RECIPE_INGREDIENTS));
+                String instructions = recipeCursor.getString(recipeCursor.getColumnIndexOrThrow(DatabaseHelper.COL_RECIPE_STEPS));
+
+                // Strict Match Evaluation: Check if ALL required ingredients exist in pantry
+                if (hasAllIngredients(pantryIngredients, ingredientsRaw)) {
+                    suggestedRecipes.add(new Recipe(id, name, ingredientsRaw, instructions));
+                }
+            } while (recipeCursor.moveToNext());
+            recipeCursor.close();
+        }
+
+        adapter.notifyDataSetChanged();
+
+        if (suggestedRecipes.isEmpty()) {
+            tvNoSuggestions.setVisibility(View.VISIBLE);
+            rvRecipes.setVisibility(View.GONE);
+        } else {
+            tvNoSuggestions.setVisibility(View.GONE);
+            rvRecipes.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private boolean hasAllIngredients(Set<String> pantrySet, String ingredientsRaw) {
+        if (ingredientsRaw == null || ingredientsRaw.trim().isEmpty()) {
+            return false;
+        }
+
+        // Parse ingredient pairs (Format: "egg:2:pcs,butter:1:tbsp")
+        String[] items = ingredientsRaw.split(",");
+        for (String item : items) {
+            String[] parts = item.split(":");
+            if (parts.length > 0) {
+                String requiredIngredient = parts[0].trim().toLowerCase();
+                // Strict check: If ANY required ingredient is missing, fail match
+                if (!pantrySet.contains(requiredIngredient)) {
+                    return false;
+                }
+            }
+        }
+        return true; // All required ingredients are available in pantry
+    }
+}

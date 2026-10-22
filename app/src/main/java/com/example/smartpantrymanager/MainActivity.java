@@ -1,5 +1,6 @@
 package com.example.smartpantrymanager;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
@@ -51,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Handle Add/Update Ingredient
         btnAdd.setOnClickListener(v -> addIngredient());
+
+        btnViewSuggestions.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, RecipeSuggestionsActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loadPantryItems() {
@@ -123,4 +129,5 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Failed to delete item", Toast.LENGTH_SHORT).show();
         }
     }
+
 }
