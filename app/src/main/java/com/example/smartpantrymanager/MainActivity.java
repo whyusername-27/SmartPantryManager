@@ -172,4 +172,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Failed to delete item", Toast.LENGTH_SHORT).show();
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadPantryItems(); // Call method that fetches items from SQLite and updates the RecyclerView adapter
+    }
 }

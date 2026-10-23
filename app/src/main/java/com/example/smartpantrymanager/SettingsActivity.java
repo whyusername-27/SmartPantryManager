@@ -51,7 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
         // Clear database action
         btnClear.setOnClickListener(v -> {
             DatabaseHelper dbHelper = new DatabaseHelper(this);
-            dbHelper.getWritableDatabase().execSQL("DELETE FROM " + DatabaseHelper.TABLE_PANTRY);
+            dbHelper.clearPantry(); // Calls the dedicated clean-up method
             Toast.makeText(this, "Pantry database cleared!", Toast.LENGTH_SHORT).show();
         });
     }
