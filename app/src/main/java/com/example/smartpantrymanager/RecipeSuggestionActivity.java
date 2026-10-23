@@ -55,7 +55,9 @@ public class RecipeSuggestionActivity extends AppCompatActivity {
         if (pantryCursor != null && pantryCursor.moveToFirst()) {
             do {
                 String name = pantryCursor.getString(pantryCursor.getColumnIndexOrThrow(DatabaseHelper.COL_PANTRY_NAME));
-                pantryIngredients.add(name.trim().toLowerCase());
+                if (name != null) {
+                    pantryIngredients.add(name.trim().toLowerCase());
+                }
             } while (pantryCursor.moveToNext());
             pantryCursor.close();
         }
@@ -69,8 +71,8 @@ public class RecipeSuggestionActivity extends AppCompatActivity {
                 String ingredientsRaw = recipeCursor.getString(recipeCursor.getColumnIndexOrThrow(DatabaseHelper.COL_RECIPE_INGREDIENTS));
                 String instructions = recipeCursor.getString(recipeCursor.getColumnIndexOrThrow(DatabaseHelper.COL_RECIPE_STEPS));
 
-                // Strict Match Evaluation: Check if ALL required ingredients exist in pantry
-                if (hasAllIngredients(pantryIngredients, ingredientsRaw)) {
+                // Strict Match Evaluation using robust substring/plural check
+                if (hasAllIngredientsRobust(pantryIngredients, ingredientsRaw)) {
                     suggestedRecipes.add(new Recipe(id, name, ingredientsRaw, instructions));
                 }
             } while (recipeCursor.moveToNext());
@@ -89,20 +91,32 @@ public class RecipeSuggestionActivity extends AppCompatActivity {
         }
     }
 
-    // Helper method to check if every ingredient in a raw string is available in the pantry
-    private boolean hasAllIngredients(Set<String> pantrySet, String ingredientsRaw) {
+    // Helper method incorporating the robust strict-matching logic snippet (Section 6.1/2.3)
+    private boolean hasAllIngredientsRobust(Set<String> pantrySet, String ingredientsRaw) {
         if (ingredientsRaw == null || ingredientsRaw.trim().isEmpty()) {
             return false;
         }
 
-        // Parse ingredient pairs (Format: "egg:2:pcs,butter:1:tbsp")
+        // Parse ingredient pairs (Format: "egg:2:pcs,butter:1:tbsp" or plain text)
         String[] items = ingredientsRaw.split(",");
         for (String item : items) {
             String[] parts = item.split(":");
             if (parts.length > 0) {
                 String requiredIngredient = parts[0].trim().toLowerCase();
-                // Strict check: If ANY required ingredient is missing, fail match
-                if (!pantrySet.contains(requiredIngredient)) {
+                // Clean plural suffix for robust comparison ("tomatoes" -> "tomato")
+                String reqClean = requiredIngredient.replaceAll("s$", "");
+
+                boolean found = false;
+                for (String userItem : pantrySet) {
+                    String itemClean = userItem.replaceAll("s$", "");
+                    if (itemClean.contains(reqClean) || reqClean.contains(itemClean)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                // Strict rule: If ANY required ingredient is missing, reject recipe entirely
+                if (!found) {
                     return false;
                 }
             }
